@@ -4,6 +4,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/.idea/codeStyles" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
