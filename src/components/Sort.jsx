@@ -1,24 +1,42 @@
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectSort, setSort } from '../redux/slices/filterSlice';
 
-function Sort({ value, onChangeSort }) {
+export const sortList = [
+  { name: 'популярности ˄', sortProperty: 'rating' },
+  { name: 'популярности ˅', sortProperty: '-rating' },
+  { name: 'цене ˄', sortProperty: 'price' },
+  { name: 'цене ˅', sortProperty: '-price' },
+  { name: 'алфавиту ˄', sortProperty: 'title' },
+  { name: 'алфавиту ˅', sortProperty: '-title' },
+];
+
+function Sort() {
+  const dispatch = useDispatch();
+  const sort = useSelector(selectSort);
+
+  const sortRef = React.useRef();
   const [open, setOpen] = React.useState(false);
 
-  const list = [
-    { name: 'популярности (ASC)', sortProperty: 'rating' },
-    { name: 'популярности (DESC)', sortProperty: '-rating' },
-    { name: 'цене (ASC)', sortProperty: 'price' },
-    { name: 'цене (DESC)', sortProperty: '-price' },
-    { name: 'алфавиту (ASC)', sortProperty: 'title' },
-    { name: 'алфавиту (DESC)', sortProperty: '-title' },
-  ];
-
   const onClickListItem = (obj) => {
-    onChangeSort(obj);
+    dispatch(setSort(obj));
     setOpen(false);
   };
 
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.composedPath().includes(sortRef.current)) {
+        setOpen(false);
+      }
+    };
+
+    document.body.addEventListener('click', handleClickOutside);
+
+    return () => document.body.removeEventListener('click', handleClickOutside);
+  }, []);
+
   return (
-    <div className="sort">
+    <div ref={sortRef} className="sort">
       <div className="sort__label">
         <svg
           width="10"
@@ -33,17 +51,17 @@ function Sort({ value, onChangeSort }) {
           />
         </svg>
         <b>Сортировка по:</b>
-        <span onClick={() => setOpen(!open)}>{value.name}</span>
+        <span onClick={() => setOpen(!open)}>{sort.name}</span>
       </div>
       {open && (
         <div className="sort__popup">
           <ul>
-            {list.map((obj, i) => (
+            {sortList.map((obj, i) => (
               <li
                 key={i}
                 onClick={() => onClickListItem(obj)}
                 className={
-                  value.sortProperty === obj.sortProperty ? 'active' : ''
+                  sort.sortProperty === obj.sortProperty ? 'active' : ''
                 }
               >
                 {obj.name}

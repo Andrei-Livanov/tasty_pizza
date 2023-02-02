@@ -1,59 +1,108 @@
 import React from 'react';
-import { SearchContext } from '../App';
+import qs from 'qs';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  selectFilter,
+  setCategoryId,
+  setCurrentPage,
+  setFilters,
+} from '../redux/slices/filterSlice';
+import { fetchPizzas, selectPizzaData } from '../redux/slices/pizzaSlice';
 
 import Categories from '../components/Categories';
-import Sort from '../components/Sort';
+import Sort, { sortList } from '../components/Sort';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import PizzaBlock from '../components/PizzaBlock';
 import Pagination from '../components/Pagination';
 
 const Home = () => {
-  const { searchValue } = React.useContext(SearchContext);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { items, status } = useSelector(selectPizzaData);
+  const { categoryId, searchValue, currentPage, sort } = useSelector(selectFilter);
 
-  const [items, setItems] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [categoryId, setCategoryId] = React.useState(0);
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [sortType, setSortType] = React.useState({
-    name: 'популярности (ASC)',
-    sortProperty: 'rating',
-  });
+  const isSearch = React.useRef(false);
+  const isMounted = React.useRef(false);
 
-  React.useEffect(() => {
-    setIsLoading(true);
-
+  const getPizzas = async () => {
     const category = categoryId > 0 ? `category=${categoryId}` : '';
     const search = searchValue ? `&search=${searchValue}` : '';
-    const sortBy = sortType.sortProperty.replace('-', '');
-    const order = sortType.sortProperty.includes('-') ? 'desc' : 'asc';
+    const sortBy = sort.sortProperty.replace('-', '');
+    const order = sort.sortProperty.includes('-') ? 'desc' : 'asc';
 
-    fetch(
-      `https://63c51c19e1292e5bea1af867.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`
-    )
-      .then((res) => res.json())
-      .then((arr) => {
-        setItems(arr);
-        setIsLoading(false);
-      });
+    dispatch(fetchPizzas({ category, search, sortBy, order, currentPage }));
+
     window.scrollTo(0, 0);
-  }, [categoryId, sortType, searchValue, currentPage]);
+  };
+
+  React.useEffect(() => {
+    if (isMounted.current) {
+      const queryString = qs.stringify(
+        {
+          currentPage,
+          categoryId,
+          sortProperty: sort.sortProperty,
+        },
+        { addQueryPrefix: true }
+      );
+
+      navigate(`${queryString}`);
+    }
+
+    isMounted.current = true;
+  }, [categoryId, sort.sortProperty, currentPage]);
+
+  React.useEffect(() => {
+    if (window.location.search) {
+      const params = qs.parse(window.location.search.substring(1));
+
+      const sort = sortList.find(
+        (obj) => obj.sortProperty === params.sortProperty
+      );
+
+      dispatch(setFilters({ ...params, sort }));
+      isSearch.current = true;
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (!isSearch.current) {
+      getPizzas();
+    }
+
+    isSearch.current = false;
+  }, [categoryId, sort.sortProperty, searchValue, currentPage]);
 
   return (
     <div className="container">
       <div className="content__top">
         <Categories
           value={categoryId}
-          onChangeCategory={(i) => setCategoryId(i)}
+          onChangeCategory={(i) => dispatch(setCategoryId(i))}
         />
-        <Sort value={sortType} onChangeSort={(obj) => setSortType(obj)} />
+        <Sort />
       </div>
       <h2 className="content__title">Все пиццы</h2>
-      <div className="content__items">
-        {isLoading
-          ? [...new Array(6).keys()].map((value) => <Skeleton key={value} />)
-          : items.map((obj) => <PizzaBlock key={obj.id} {...obj} />)}
-      </div>
-      <Pagination onChangePage={(number) => setCurrentPage(number)} />
+      {status === 'error' ? (
+        <div className="content__error-info">
+          <h2>Произошла ошибка 😕</h2>
+          <p>
+            К сожалению, не удалось получить пиццы. Попробуйте повторить попытку
+            позже.
+          </p>
+        </div>
+      ) : (
+        <div className="content__items">
+          {status === 'loading'
+            ? [...new Array(6).keys()].map((value) => <Skeleton key={value} />)
+            : items.map((obj) => <PizzaBlock key={obj.id} {...obj} />)}
+        </div>
+      )}
+      <Pagination
+        currentPage={currentPage}
+        onChangePage={(number) => dispatch(setCurrentPage(number))}
+      />
     </div>
   );
 };
