@@ -1,39 +1,32 @@
 import React from 'react';
-import qs from 'qs';
-import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../redux/store';
+import { selectFilter } from '../redux/filter/selectors';
+import { fetchPizzas } from '../redux/pizza/asyncActions';
+import { selectPizzaData } from '../redux/pizza/selectors';
+import { setCategoryId, setCurrentPage } from '../redux/filter/slice';
 import {
-  selectFilter,
-  setCategoryId,
-  setCurrentPage,
-  setFilters,
+  Categories,
+  Pagination,
+  PizzaBlock,
+  Skeleton,
   Sort,
-} from '../redux/slices/filterSlice';
-import {
-  fetchPizzas,
-  SearchPizzaParams,
-  selectPizzaData,
-} from '../redux/slices/pizzaSlice';
-
-import Categories from '../components/Categories';
-import SortPopup, { sortList } from '../components/SortPopup';
-import Skeleton from '../components/PizzaBlock/Skeleton';
-import PizzaBlock from '../components/PizzaBlock';
-import Pagination from '../components/Pagination';
+} from '../components';
 
 const Home: React.FC = () => {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
   const { items, status } = useSelector(selectPizzaData);
   const { categoryId, searchValue, currentPage, sort } =
     useSelector(selectFilter);
 
-  const isMounted = React.useRef(false);
+  const onChangeCategory = React.useCallback((idx: number) => {
+    dispatch(setCategoryId(idx));
+  }, []);
 
   const getPizzas = () => {
-    const category = categoryId > 0 ? `category=${categoryId}` : '';
-    const search = searchValue ? `&search=${searchValue}` : '';
+    const category = categoryId > 0 ? String(categoryId) : '';
+    const search = searchValue;
     const sortBy = sort.sortProperty.replace('-', '');
     const order = sort.sortProperty.includes('-') ? 'desc' : 'asc';
 
@@ -50,45 +43,6 @@ const Home: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  // React.useEffect(() => {
-  //   if (isMounted.current) {
-  //     const params = {
-  //       categoryId: categoryId > 0 ? categoryId : null,
-  //       sortProperty: sort.sortProperty,
-  //       currentPage,
-  //     };
-  //
-  //     const queryString = qs.stringify(params, { skipNulls: true });
-  //
-  //     navigate(`/?${queryString}`);
-  //   }
-  //
-  //   if (!window.location.search) {
-  //     dispatch(fetchPizzas({} as SearchPizzaParams));
-  //   }
-  // }, [categoryId, searchValue, sort.sortProperty, currentPage]);
-
-  // React.useEffect(() => {
-  //   if (window.location.search) {
-  //     const params = qs.parse(
-  //       window.location.search.substring(1)
-  //     ) as SearchPizzaParams;
-  //
-  //     const sort = sortList.find((obj) => obj.sortProperty === params.sortBy);
-  //
-  //     dispatch(
-  //       setFilters({
-  //         categoryId: Number(params.category),
-  //         searchValue: params.search,
-  //         currentPage: Number(params.currentPage),
-  //         sort: sort || sortList[0],
-  //       })
-  //     );
-  //   }
-  //
-  //   isMounted.current = true;
-  // }, []);
-
   React.useEffect(() => {
     getPizzas();
   }, [categoryId, sort.sortProperty, searchValue, currentPage]);
@@ -96,11 +50,8 @@ const Home: React.FC = () => {
   return (
     <div className="container">
       <div className="content__top">
-        <Categories
-          value={categoryId}
-          onChangeCategory={(idx: number) => dispatch(setCategoryId(idx))}
-        />
-        <SortPopup />
+        <Categories value={categoryId} onChangeCategory={onChangeCategory} />
+        <Sort value={sort} />
       </div>
       <h2 className="content__title">Все пиццы</h2>
       {status === 'error' ? (
@@ -115,7 +66,7 @@ const Home: React.FC = () => {
         <div className="content__items">
           {status === 'loading'
             ? [...new Array(6)].map((_, index) => <Skeleton key={index} />)
-            : items.map((obj: any) => <PizzaBlock {...obj} />)}
+            : items.map((obj: any) => <PizzaBlock key={obj.id} {...obj} />)}
         </div>
       )}
       <Pagination

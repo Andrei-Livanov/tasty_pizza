@@ -1,17 +1,13 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import {
-  selectSort,
-  setSort,
-  SortPropertyEnum,
-} from '../redux/slices/filterSlice';
+import { useDispatch } from 'react-redux';
+import { setSort } from '../redux/filter/slice';
+import { SortType, SortPropertyEnum } from '../redux/filter/types';
 
-type SortItem = {
-  name: string;
-  sortProperty: SortPropertyEnum;
+type SortProps = {
+  value: SortType;
 };
 
-export const sortList: SortItem[] = [
+export const sortList: SortType[] = [
   { name: 'популярности ↑', sortProperty: SortPropertyEnum.RATING_ASC },
   { name: 'популярности ↓', sortProperty: SortPropertyEnum.RATING_DESC },
   { name: 'цене ↑', sortProperty: SortPropertyEnum.PRICE_ASC },
@@ -20,14 +16,12 @@ export const sortList: SortItem[] = [
   { name: 'алфавиту ↓', sortProperty: SortPropertyEnum.TITLE_DESC },
 ];
 
-function SortPopup() {
+export const Sort: React.FC<SortProps> = React.memo(({ value }) => {
   const dispatch = useDispatch();
-  const sort = useSelector(selectSort);
-
-  const sortRef = React.useRef<HTMLDivElement>(null);
   const [open, setOpen] = React.useState(false);
+  const sortRef = React.useRef<HTMLDivElement>(null);
 
-  const onClickListItem = (obj: SortItem) => {
+  const onClickListItem = (obj: SortType) => {
     dispatch(setSort(obj));
     setOpen(false);
   };
@@ -60,7 +54,7 @@ function SortPopup() {
           />
         </svg>
         <b>Сортировка по:</b>
-        <span onClick={() => setOpen(!open)}>{sort.name}</span>
+        <span onClick={() => setOpen(!open)}>{value.name}</span>
       </div>
       {open && (
         <div className="sort__popup">
@@ -70,7 +64,7 @@ function SortPopup() {
                 key={i}
                 onClick={() => onClickListItem(obj)}
                 className={
-                  sort.sortProperty === obj.sortProperty ? 'active' : ''
+                  value.sortProperty === obj.sortProperty ? 'active' : ''
                 }
               >
                 {obj.name}
@@ -81,6 +75,4 @@ function SortPopup() {
       )}
     </div>
   );
-}
-
-export default SortPopup;
+});
