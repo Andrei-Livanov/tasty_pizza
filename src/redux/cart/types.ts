@@ -6,6 +6,7 @@ export type CartItemType = {
   type: string;
   size: number;
   count: number;
+  mathSign?: 'plus' | 'minus' | 'remove';
 };
 
 export interface CartSliceState {

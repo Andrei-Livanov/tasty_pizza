@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { CartItemType } from '../redux/cart/types';
-import { addItem, minusItem, removeItem } from '../redux/cart/slice';
+import { addItemOrDelete } from '../redux/cart/slice';
 
 type CartItemProps = {
   id: string;
@@ -24,18 +24,11 @@ export const CartItem: React.FC<CartItemProps> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const onClickPlus = () => {
-    dispatch(addItem({ id } as CartItemType));
-  };
-
-  const onClickMinus = () => {
-    dispatch(minusItem(id));
-  };
-
-  const onClickRemove = () => {
-    if (window.confirm('Ты действительно хочешь удалить пиццу?')) {
-      dispatch(removeItem(id));
+  const onClickPlusOrMinusOrRemove = (mathSign: string) => {
+    if (mathSign === 'remove') {
+      window.confirm('Ты действительно хочешь удалить пиццу?');
     }
+    dispatch(addItemOrDelete({ id, type, size, mathSign } as CartItemType));
   };
 
   return (
@@ -52,7 +45,7 @@ export const CartItem: React.FC<CartItemProps> = ({
       <div className="cart__item-count">
         <button
           disabled={count === 1}
-          onClick={onClickMinus}
+          onClick={() => onClickPlusOrMinusOrRemove('minus')}
           className="button button--outline button--circle cart__item-count-minus"
         >
           <svg
@@ -74,7 +67,7 @@ export const CartItem: React.FC<CartItemProps> = ({
         </button>
         <b>{count}</b>
         <button
-          onClick={onClickPlus}
+          onClick={() => onClickPlusOrMinusOrRemove('plus')}
           className="button button--outline button--circle cart__item-count-plus"
         >
           <svg
@@ -100,7 +93,7 @@ export const CartItem: React.FC<CartItemProps> = ({
       </div>
       <div className="cart__item-remove">
         <div
-          onClick={onClickRemove}
+          onClick={() => onClickPlusOrMinusOrRemove('remove')}
           className="button button--outline button--circle"
         >
           <svg
