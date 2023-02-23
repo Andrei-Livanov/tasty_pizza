@@ -5,6 +5,7 @@ import { selectFilter } from '../redux/filter/selectors';
 import { fetchPizzas } from '../redux/pizza/asyncActions';
 import { selectPizzaData } from '../redux/pizza/selectors';
 import { setCategoryId, setCurrentPage } from '../redux/filter/slice';
+
 import {
   Categories,
   Pagination,
@@ -32,11 +33,13 @@ const Home: React.FC = () => {
 
     dispatch(
       fetchPizzas({
-        category,
+        category: search ? '' : category,
         search,
         sortBy,
         order,
-        currentPage: String(currentPage),
+        currentPage: String(
+          categoryId > 0 ? 1 : currentPage && search ? 1 : currentPage
+        ),
       })
     );
 
@@ -71,6 +74,7 @@ const Home: React.FC = () => {
       )}
       <Pagination
         currentPage={currentPage}
+        pageCount={categoryId === 0 ? 3 : 1}
         onChangePage={(page: number) => dispatch(setCurrentPage(page))}
       />
     </div>
