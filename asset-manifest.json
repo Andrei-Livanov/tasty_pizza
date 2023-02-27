@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/tasty_pizza/static/css/main.3e2e54b4.css",
-    "main.js": "/tasty_pizza/static/js/main.8d091759.js",
+    "main.js": "/tasty_pizza/static/js/main.9949771d.js",
     "Cart.js": "/tasty_pizza/static/js/Cart.0a8052a1.chunk.js",
     "FullPizza.js": "/tasty_pizza/static/js/FullPizza.2c2f0e66.chunk.js",
     "NotFound.js": "/tasty_pizza/static/js/NotFound.9e7c4125.chunk.js",
@@ -9,13 +9,13 @@
     "static/media/pizza-logo.svg": "/tasty_pizza/static/media/pizza-logo.56ac87032d8f6fdf863326acd06c0d97.svg",
     "index.html": "/tasty_pizza/index.html",
     "main.3e2e54b4.css.map": "/tasty_pizza/static/css/main.3e2e54b4.css.map",
-    "main.8d091759.js.map": "/tasty_pizza/static/js/main.8d091759.js.map",
+    "main.9949771d.js.map": "/tasty_pizza/static/js/main.9949771d.js.map",
     "Cart.0a8052a1.chunk.js.map": "/tasty_pizza/static/js/Cart.0a8052a1.chunk.js.map",
     "FullPizza.2c2f0e66.chunk.js.map": "/tasty_pizza/static/js/FullPizza.2c2f0e66.chunk.js.map",
     "NotFound.9e7c4125.chunk.js.map": "/tasty_pizza/static/js/NotFound.9e7c4125.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3e2e54b4.css",
-    "static/js/main.8d091759.js"
+    "static/js/main.9949771d.js"
   ]
 }
